@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="slides-format" content="viewport">
+  <title>ADO, ADPF e Controle de Constitucionalidade nos Estados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-bg: #0c1220;
+      --color-bg-deep: #060c18;
+      --color-surface: #162035;
+      --color-text: #f1f5f9;
+      --color-text-secondary: #dbe5f0;
+      --color-text-muted: #9fb2c8;
+      --color-accent-1: #1d6fa4;
+      --color-accent-2: #e8c96b;
+      --color-accent-3: #4ba3c3;
+      --color-glass-bg: rgba(255,255,255,0.07);
+      --color-glass-border: rgba(255,255,255,0.11);
+      --color-vignette: rgba(0,0,0,0.45);
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+  </style>
+  <style>
+    :root { --color-bg: #0c1220; --color-text: #f1f5f9; --glow-color-rgb: 29,111,164; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { background: var(--color-bg); margin: 0; }
+    body { font-family: 'DM Sans', sans-serif; color: var(--color-text); overflow: hidden; height: 100vh; width: 100vw; }
+    .deck { width: 100vw; height: 100vh; position: relative; }
+    .slide { position: absolute; inset: 0; background: var(--color-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transform: scale(0.95); transition: opacity .7s ease, transform .7s ease; pointer-events: none; overflow: hidden; }
+    .slide.active { opacity: 1; transform: scale(1); pointer-events: all; }
+    .slide > .content { position: relative; z-index: 2; width: 100%; max-width: 1280px; padding: clamp(1rem, 2.5vw, 2rem); }
+    .nav-controls { position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; z-index: 100; background: rgba(255,255,255,0.03); backdrop-filter: blur(6px); padding: 2px 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); opacity: .38; }
+    .nav-btn { width: 22px; height: 22px; border: none; background: rgba(255,255,255,0.04); color: #89a7bf; border-radius: 50%; font-size: .75rem; cursor: pointer; }
+    .slide-dots { display: flex; gap: 3px; }
+    .slide-dots .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.12); cursor: pointer; transition: .3s; }
+    .slide-dots .dot.active { background: rgba(232,201,107,.65); transform: scale(1.15); }
+    .slide-counter { font-size: .62rem; color: #8da3b9; min-width: 30px; text-align: center; }
+    .reveal { opacity: 0; transform: translateY(18px); }
+    .gradient-mesh { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(80px); animation: float-slow 12s ease-in-out infinite; }
+    .blob:nth-child(2) { animation: float-drift 16s ease-in-out infinite; }
+    .blob:nth-child(3) { animation: float-slow 18s ease-in-out infinite reverse; }
+    .slide::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-repeat: repeat; background-size: 256px 256px; opacity: .03; mix-blend-mode: overlay; }
+    .slide::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(ellipse at center, transparent 48%, rgba(0,0,0,.45) 100%); }
+    @keyframes float-slow { 0%{transform:translate(0,0) scale(1)} 25%{transform:translate(60px,-50px) scale(1.12)} 50%{transform:translate(-40px,40px) scale(.9)} 75%{transform:translate(50px,20px) scale(1.08)} 100%{transform:translate(0,0) scale(1)} }
+    @keyframes float-drift { 0%{transform:translate(0,0) scale(1) rotate(0deg)} 33%{transform:translate(-50px,-60px) scale(1.15) rotate(3deg)} 66%{transform:translate(40px,30px) scale(.88) rotate(-2deg)} 100%{transform:translate(0,0) scale(1) rotate(0deg)} }
+    @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .person-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(29,111,164,0.18); border: 1px solid rgba(29,111,164,0.35); border-radius: 24px; padding: 5px 14px; font-size: 0.9rem; font-weight: 700; color: #4ba3c3; letter-spacing: .04em; text-transform: uppercase; }
+    .title-stack { font-size: clamp(2.2rem, 5vw, 4.2rem); font-weight: 900; line-height: 1.05; margin: 0 0 16px 0; }
+    .group-line { display:flex; flex-wrap:wrap; justify-content:center; gap:10px 18px; max-width:1000px; margin:18px auto 0; color:#dbe5f0; font-size:1rem; line-height:1.5; }
+    .group-line span { white-space: nowrap; }
+    .section-title { font-family:'Playfair Display', serif; font-size: clamp(1.8rem, 3.7vw, 2.8rem); line-height:1.08; margin: 0 0 14px 0; }
+    .topic-grid-2 { display:grid; grid-template-columns: 1.03fr .97fr; gap:14px; align-items:stretch; }
+    .topic-grid-3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+    .card { background: rgba(255,255,255,0.045); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:16px 17px; box-shadow: 0 10px 26px rgba(0,0,0,.12); }
+    .card h3 { margin:0 0 10px 0; font-size:1.16rem; color:#f8fafc; }
+    .card p, .card li { color:#dbe5f0; font-size:.96rem; line-height:1.46; }
+    .card ul { margin:0; padding-left: 18px; }
+    .mini { font-size:.92rem !important; }
+    .case-tag { display:inline-block; background: rgba(232,201,107,.12); border:1px solid rgba(232,201,107,.28); border-radius:8px; padding:3px 10px; color:#e8c96b; font-size:.8rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:10px; }
+    .emphasis { color:#e8c96b; font-weight:700; }
+    .accent { color:#4ba3c3; font-weight:700; }
+    .divider-slide { background: linear-gradient(135deg, #060c18 0%, #0c1220 60%, #12203a 100%) !important; }
+    .compare-table { width:100%; border-collapse: collapse; font-size: .98rem; }
+    .compare-table th, .compare-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.09); vertical-align: top; }
+    .compare-table th { color:#e8c96b; text-align:left; background: rgba(29,111,164,.18); }
+    .compare-table td:first-child { color:#9fb2c8; font-weight:700; width: 20%; }
+    .footer-note { color:#8ea3b8; font-size:.88rem; margin-top:10px; }
+    .small-2col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media (max-width: 980px) {
+      .topic-grid-2, .topic-grid-3, .small-2col { grid-template-columns: 1fr; }
+      .group-line { font-size: .92rem; }
+      .card p, .card li { font-size: .94rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="mouse-spotlight" style="position:fixed;inset:0;z-index:99;pointer-events:none;"></div>
+<div class="deck">
+
+  <div class="slide active" data-slide="1">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:560px;height:560px;top:-120px;right:-120px;background:#1d6fa4;opacity:.18;"></div>
+      <div class="blob" style="width:340px;height:340px;bottom:-70px;left:-40px;background:#e8c96b;opacity:.10;"></div>
+      <div class="blob" style="width:220px;height:220px;top:44%;left:18%;background:#4ba3c3;opacity:.08;"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div class="reveal" style="font-size:82px; margin-bottom:10px; animation:float 3s ease-in-out infinite;">⚖️</div>
+      <h1 class="title-stack reveal" style="background:linear-gradient(135deg,#4ba3c3,#e8c96b,#1d6fa4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+        ADO<br>ADPF<br>Controle de Constitucionalidade nos Estados
+      </h1>
+      <p class="reveal" style="font-size:1.06rem;color:#9fb2c8;letter-spacing:4px;text-transform:uppercase;margin:0;">Seminário de Direito Constitucional</p>
+      <div class="group-line reveal">
+        <span>Amanda Damascena de Jesus</span>
+        <span>André Luiz Nascimento Silva</span>
+        <span>Camila de Souza Oliveira</span>
+        <span>Cleberson Rodrigues Santos</span>
+        <span>Guilherme Lacerda Braga Almeida</span>
+        <span>Henrique Nunes Nascimento</span>
+        <span>Isabela Bianca Santos Rego</span>
+        <span>Letícia Jesus dos Santos</span>
+        <span>Lorena Santos Cabral</span>
+      </div>
+      <p class="reveal" style="font-size:.92rem;color:#7f91a6;margin-top:16px;">Apresentação oral: André, Cleberson, Guilherme e Letícia.</p>
+    </div>
+  </div>
+
+  <div class="slide divider-slide" data-slide="2">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:520px;height:520px;top:-100px;left:-100px;background:#1d6fa4;opacity:.20;"></div>
+      <div class="blob" style="width:300px;height:300px;bottom:-70px;right:-40px;background:#4ba3c3;opacity:.10;"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div class="reveal" style="font-size:88px;margin-bottom:10px;">📘</div>
+      <div class="person-badge reveal">Primeiro eixo</div>
+      <h2 class="section-title reveal" style="font-size:clamp(2.3rem,4.8vw,4rem);background:linear-gradient(135deg,#4ba3c3,#1d6fa4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ADO</h2>
+      <p class="reveal" style="font-size:1.14rem;color:#9fb2c8;letter-spacing:4px;text-transform:uppercase;">Definição, fundamento, efeitos e casos emblemáticos</p>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="3">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-60px;right:-60px;background:#1d6fa4;opacity:.10;"></div>
+      <div class="blob" style="width:250px;height:250px;bottom:-50px;left:-20px;background:#4ba3c3;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">ADO: conceito, fundamento e cabimento</h2>
+      <div class="topic-grid-2">
+        <div>
+          <div class="card reveal">
+            <h3>Definição</h3>
+            <p>A <span class="emphasis">Ação Direta de Inconstitucionalidade por Omissão</span> é instrumento do controle concentrado usado quando a Constituição impõe um dever de legislar ou agir e o poder público permanece inerte. Seu objetivo é combater a <span class="accent">omissão inconstitucional</span>, total ou parcial, que impede a eficácia da norma constitucional.</p>
+          </div>
+          <div class="card reveal" style="margin-top:14px;">
+            <h3>Fundamentação</h3>
+            <ul>
+              <li>Previsão expressa no <span class="emphasis">art. 103, §2º, da Constituição Federal</span>.</li>
+              <li>Procedimento disciplinado pela <span class="emphasis">Lei 9.868/1999</span>.</li>
+              <li>Omissão total: inexistência da norma; omissão parcial: disciplina insuficiente.</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="card reveal">
+            <h3>Quem pode propor</h3>
+            <p class="mini">São os legitimados do art. 103 da CF: Presidente da República, Mesas do Senado e da Câmara, PGR, Governadores, Mesas das Assembleias Legislativas, OAB, partidos políticos com representação no Congresso e confederações sindicais ou entidades de classe de âmbito nacional.</p>
+          </div>
+          <div class="card reveal" style="margin-top:14px;">
+            <h3>Quando cabe</h3>
+            <p class="mini">Cabe quando a ausência de norma regulamentadora ou de providência estatal inviabiliza a concretização de direito, garantia ou estrutura constitucional. Exemplo: direitos sociais previstos na Constituição sem disciplina normativa suficiente para plena eficácia.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="4">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-60px;right:-60px;background:#1d6fa4;opacity:.10;"></div>
+      <div class="blob" style="width:250px;height:250px;bottom:-50px;left:-20px;background:#e8c96b;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">Efeitos das decisões no controle concentrado</h2>
+      <div class="topic-grid-3">
+        <div class="card reveal">
+          <h3>Erga omnes e inter partes</h3>
+          <p>Nas ações do controle concentrado, como ADO e ADPF, a decisão produz efeito <span class="emphasis">erga omnes</span>, isto é, vale para todos. O efeito <span class="accent">inter partes</span>, típico do controle concreto, limita a decisão apenas às partes do processo.</p>
+        </div>
+        <div class="card reveal">
+          <h3>Ex tunc e ex nunc</h3>
+          <p><span class="emphasis">Ex tunc</span> significa retroação, atingindo a situação desde a origem do vício. <span class="emphasis">Ex nunc</span> significa eficácia prospectiva, a partir do julgamento, hipótese usada quando o tribunal modula os efeitos por segurança jurídica ou interesse social.</p>
+        </div>
+        <div class="card reveal">
+          <h3>Na ADO</h3>
+          <p>Na ADO, o STF reconhece a mora do órgão omisso e comunica a necessidade de suprimento. Em regra, a lógica principal não é invalidar ato passado, mas <span class="accent">viabilizar a concretização futura</span> da Constituição, podendo o Tribunal fixar prazo ou determinar providências.</p>
+        </div>
+      </div>
+      <div class="card reveal" style="margin-top:16px;">
+        <h3>Efeito vinculante</h3>
+        <p>A decisão em controle concentrado também possui força vinculante em relação ao Poder Judiciário e à Administração Pública. Isso impede que órgãos inferiores desrespeitem a interpretação fixada pelo STF sobre a omissão constitucional ou sobre a violação a preceito fundamental.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="5">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:360px;height:360px;top:-60px;right:-60px;background:#1d6fa4;opacity:.10;"></div>
+      <div class="blob" style="width:250px;height:250px;bottom:-50px;left:-20px;background:#4ba3c3;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">Casos emblemáticos de ADO</h2>
+      <div class="small-2col">
+        <div class="card reveal">
+          <div class="case-tag">ADO 26 · 2019</div>
+          <h3>Criminalização da homofobia e transfobia</h3>
+          <p>O STF reconheceu a omissão inconstitucional do Congresso em criminalizar condutas homotransfóbicas e, em julgamento conjunto com o MI 4.733, determinou a aplicação da Lei do Racismo até edição de lei específica. O caso é um dos mais midiáticos da história recente do STF.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag">ADO 20 · 2023</div>
+          <h3>Licença-paternidade</h3>
+          <p>O Supremo reconheceu a mora legislativa na regulamentação do art. 7º, XIX, da Constituição. A Corte fixou prazo para o Congresso legislar sobre o tema, destacando a longa demora na concretização do direito social previsto no texto constitucional.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag">ADO 74 · 2024</div>
+          <h3>Adicional de penosidade</h3>
+          <p>A Corte reconheceu a omissão legislativa relacionada ao adicional para atividades penosas, direito previsto no art. 7º, XXIII. O caso mostra que a ADO também pressiona a concretização de direitos trabalhistas constitucionais historicamente negligenciados.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag">Ponto para fala</div>
+          <h3>Ideia central para apresentar</h3>
+          <p>Na ADO, o foco não é apenas declarar que existe omissão. O ponto principal é demonstrar como a inércia estatal compromete a eficácia da Constituição e leva o STF a exigir providências concretas para tornar o texto constitucional efetivo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide divider-slide" data-slide="6">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:500px;height:500px;top:-100px;right:-60px;background:#e8c96b;opacity:.14;"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-60px;left:-40px;background:#1d6fa4;opacity:.08;"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div class="reveal" style="font-size:88px;margin-bottom:10px;">📚</div>
+      <div class="person-badge reveal" style="border-color:rgba(232,201,107,.35);background:rgba(232,201,107,.12);color:#e8c96b;">Segundo eixo</div>
+      <h2 class="section-title reveal" style="font-size:clamp(2.3rem,4.8vw,4rem);background:linear-gradient(135deg,#f5d77f,#e8c96b,#c99618);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ADPF</h2>
+      <p class="reveal" style="font-size:1.14rem;color:#9fb2c8;letter-spacing:4px;text-transform:uppercase;">Conceito, subsidiariedade, efeitos e julgados históricos</p>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="7">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:350px;height:350px;top:-60px;right:-60px;background:#e8c96b;opacity:.10;"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-40px;left:-20px;background:#1d6fa4;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">ADPF: Conceito e Finalidade</h2>
+      <div class="topic-grid-2">
+        <div>
+          <div class="card reveal">
+            <h3>Definição e fundamento</h3>
+            <p>A <span class="emphasis">Arguição de Descumprimento de Preceito Fundamental</span> é ação do controle concentrado prevista no <span class="emphasis">art. 102, §1º, da CF</span> e regulamentada pela <span class="emphasis">Lei 9.882/1999</span>. Ela busca evitar ou reparar lesão a preceito fundamental decorrente de ato do Poder Público, inclusive quando se trata de normas anteriores à Constituição de 1988.</p>
+          </div>
+          <div class="card reveal" style="margin-top:16px;">
+            <h3>Subsidiariedade</h3>
+            <p class="mini">A ADPF possui caráter subsidiário: só é cabível quando não houver outro meio eficaz para sanar a lesão. Por isso, se houver meio processual mais adequado e eficaz, a ADPF tende a não ser admitida.</p>
+          </div>
+        </div>
+        <div>
+          <div class="card reveal">
+            <h3>O que são preceitos fundamentais</h3>
+            <ul>
+              <li>Direitos e garantias fundamentais.</li>
+              <li>Cláusulas pétreas e princípios estruturantes da Constituição.</li>
+              <li>Princípios sensíveis da federação, separação dos poderes e dignidade da pessoa humana.</li>
+            </ul>
+          </div>
+          <div class="card reveal" style="margin-top:16px;">
+            <h3>Efeitos da decisão</h3>
+            <p class="mini">Em regra, a decisão em ADPF tem efeito <span class="emphasis">erga omnes</span> e <span class="accent">vinculante</span>. Quanto ao tempo, pode produzir eficácia <span class="emphasis">ex tunc</span> ou <span class="emphasis">ex nunc</span>, a depender da modulação feita pelo STF para preservar segurança jurídica e estabilidade institucional.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="8">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:350px;height:350px;top:-60px;right:-60px;background:#e8c96b;opacity:.10;"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-40px;left:-20px;background:#1d6fa4;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">ADPF: Exemplos emblemáticos</h2>
+      <div class="small-2col">
+        <div class="card reveal">
+          <div class="case-tag">ADPF 54 · 2012</div>
+          <h3>Anencefalia</h3>
+          <p>O STF decidiu que a interrupção da gestação de feto anencéfalo não configura crime, afastando a incidência de tipos penais do Código Penal nesse contexto. Foi um julgamento amplamente debatido por envolver dignidade humana, autonomia da mulher, saúde pública e laicidade do Estado.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag">ADPF 130 · 2009</div>
+          <h3>Lei de Imprensa</h3>
+          <p>O Supremo entendeu que a Lei de Imprensa, editada durante a ditadura militar, não foi recepcionada pela Constituição de 1988. O caso fortaleceu a liberdade de expressão e a liberdade de imprensa como preceitos fundamentais do Estado Democrático de Direito.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag">ADPF 347 · 2015</div>
+          <h3>Sistema carcerário e estado de coisas inconstitucional</h3>
+          <p>Nessa decisão, o STF reconheceu a situação estrutural de violação massiva de direitos no sistema prisional brasileiro. O caso se tornou emblemático por admitir resposta constitucional ampla diante de um problema institucional persistente e generalizado.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag">ADPF 153 · 2010</div>
+          <h3>Lei de Anistia</h3>
+          <p>O Tribunal manteve a validade da interpretação ampla da Lei de Anistia, o que gerou fortes controvérsias políticas, históricas e internacionais. É um exemplo importante de ADPF ligada à memória institucional do país e aos limites do controle jurisdicional em temas politicamente sensíveis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide divider-slide" data-slide="9">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:500px;height:500px;top:-100px;left:-70px;background:#4ba3c3;opacity:.16;"></div>
+      <div class="blob" style="width:280px;height:280px;bottom:-60px;right:-40px;background:#e8c96b;opacity:.09;"></div>
+    </div>
+    <canvas class="particle-canvas-ambient" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div class="reveal" style="font-size:88px;margin-bottom:10px;">🏛️</div>
+      <div class="person-badge reveal" style="border-color:rgba(75,163,195,.35);background:rgba(75,163,195,.12);color:#4ba3c3;">Terceiro eixo</div>
+      <h2 class="section-title reveal" style="font-size:clamp(2rem,4.8vw,3.7rem);background:linear-gradient(135deg,#4ba3c3,#7dd3fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Controle de Constitucionalidade<br>nos Estados</h2>
+      <p class="reveal" style="font-size:1.08rem;color:#9fb2c8;letter-spacing:4px;text-transform:uppercase;">Fundamento, competência, efeitos e limites</p>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="10">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:350px;height:350px;top:-60px;right:-60px;background:#4ba3c3;opacity:.10;"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-40px;left:-20px;background:#1d6fa4;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">Fundamento e estrutura do controle estadual</h2>
+      <div class="topic-grid-2">
+        <div>
+          <div class="card reveal">
+            <h3>Base constitucional</h3>
+            <p>O controle concentrado nos Estados decorre do <span class="emphasis">art. 125, §2º, da Constituição Federal</span>, que autoriza a criação da representação de inconstitucionalidade perante os Tribunais de Justiça. O parâmetro principal é a <span class="accent">Constituição Estadual</span>, e o objeto são leis ou atos normativos estaduais e municipais.</p>
+          </div>
+          <div class="card reveal" style="margin-top:16px;">
+            <h3>Competência e legitimidade</h3>
+            <p class="mini">Cabe ao Tribunal de Justiça processar e julgar a ação. A Constituição veda a concentração da legitimidade em um único órgão, o que preserva o pluralismo institucional do controle de constitucionalidade estadual.</p>
+          </div>
+        </div>
+        <div>
+          <div class="card reveal">
+            <h3>Normas de reprodução obrigatória</h3>
+            <p class="mini">Quando a Constituição Estadual apenas reproduz norma de observância obrigatória da Constituição Federal, o TJ pode julgar a representação, mas sua decisão pode ser revista pelo STF por meio de recurso extraordinário. Isso ocorre porque, nessa hipótese, também há questão constitucional federal envolvida.</p>
+          </div>
+          <div class="card reveal" style="margin-top:16px;">
+            <h3>Efeitos da decisão</h3>
+            <p class="mini">No controle estadual concentrado, a decisão normalmente vale no âmbito do respectivo Estado e produz eficácia geral quanto ao objeto impugnado. O debate sobre <span class="emphasis">ex tunc</span> e <span class="emphasis">ex nunc</span> também pode surgir quando o tribunal modula os efeitos para evitar insegurança jurídica.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="11">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:350px;height:350px;top:-60px;right:-60px;background:#94a3b8;opacity:.10;"></div>
+      <div class="blob" style="width:240px;height:240px;bottom:-40px;left:-20px;background:#4ba3c3;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal">Casos e limites do controle nos Estados</h2>
+      <div class="small-2col">
+        <div class="card reveal">
+          <div class="case-tag" style="background:rgba(75,163,195,.12);border-color:rgba(75,163,195,.28);color:#4ba3c3;">Exemplo estadual</div>
+          <h3>Leis de universidades estaduais e políticas públicas</h3>
+          <p>Nos Tribunais de Justiça, são comuns representações de inconstitucionalidade envolvendo leis estaduais e municipais sobre organização administrativa, políticas públicas, competência legislativa e autonomia dos entes locais. Questões sobre universidades estaduais, estrutura da administração e despesas públicas costumam aparecer com frequência.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag" style="background:rgba(75,163,195,.12);border-color:rgba(75,163,195,.28);color:#4ba3c3;">Exemplo paradigmático</div>
+          <h3>Autonomia municipal e revisão pelo STF</h3>
+          <p>Quando a decisão do TJ se apoia em norma de reprodução obrigatória da Constituição Federal, ela pode ser questionada no STF. Isso mostra que o sistema estadual não é isolado: ele funciona em diálogo com o modelo federal e sob a supervisão final do Supremo em matéria constitucional relevante.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag" style="background:rgba(148,163,184,.12);border-color:rgba(148,163,184,.24);color:#cbd5e1;">Limites</div>
+          <h3>O que o TJ não pode ultrapassar</h3>
+          <p>O Tribunal de Justiça não pode transformar o controle estadual em réplica ilimitada do modelo federal. Seu parâmetro central continua sendo a Constituição do Estado, e a atuação deve respeitar a repartição de competências, a simetria constitucional e a autoridade do STF em questões federais.</p>
+        </div>
+        <div class="card reveal">
+          <div class="case-tag" style="background:rgba(232,201,107,.12);border-color:rgba(232,201,107,.24);color:#e8c96b;">Ponto crítico</div>
+          <h3>Por que esse tema é importante</h3>
+          <p>O controle estadual fortalece o federalismo e aproxima a fiscalização constitucional da realidade local. Ao mesmo tempo, gera debates sobre uniformidade interpretativa, risco de decisões divergentes e necessidade de harmonização entre Tribunal de Justiça e STF.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="12">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:380px;height:380px;top:-80px;right:-80px;background:#1d6fa4;opacity:.10;"></div>
+      <div class="blob" style="width:260px;height:260px;bottom:-50px;left:-30px;background:#e8c96b;opacity:.08;"></div>
+    </div>
+    <div class="content">
+      <h2 class="section-title reveal" style="text-align:center;">Quadro comparativo geral</h2>
+      <table class="compare-table reveal">
+        <thead>
+          <tr>
+            <th>Critério</th>
+            <th>ADO</th>
+            <th>ADPF</th>
+            <th>Controle nos Estados</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Fundamento</td>
+            <td>Art. 103, §2º, CF + Lei 9.868/1999</td>
+            <td>Art. 102, §1º, CF + Lei 9.882/1999</td>
+            <td>Art. 125, §2º, CF + Constituição Estadual</td>
+          </tr>
+          <tr>
+            <td>Objeto</td>
+            <td>Omissão inconstitucional do poder público</td>
+            <td>Lesão a preceito fundamental por ato do poder público</td>
+            <td>Lei ou ato normativo estadual ou municipal frente à CE</td>
+          </tr>
+          <tr>
+            <td>Órgão competente</td>
+            <td>STF</td>
+            <td>STF</td>
+            <td>Tribunal de Justiça</td>
+          </tr>
+          <tr>
+            <td>Efeitos</td>
+            <td>Erga omnes, vinculante; foco na superação da omissão</td>
+            <td>Erga omnes, vinculante; admite modulação</td>
+            <td>Eficácia geral no âmbito estadual; pode haver revisão pelo STF</td>
+          </tr>
+          <tr>
+            <td>Tempo da eficácia</td>
+            <td>Em regra voltada à concretização futura; pode haver modulação</td>
+            <td>Ex tunc ou ex nunc, conforme o caso</td>
+            <td>Pode haver modulação conforme segurança jurídica</td>
+          </tr>
+          <tr>
+            <td>Caso lembrado</td>
+            <td>ADO 26 · homofobia</td>
+            <td>ADPF 54 · anencefalia</td>
+            <td>Representações em TJs sobre leis estaduais e municipais</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="footer-note reveal">Observação útil para a fala: “inter partes” é expressão mais ligada ao controle concreto; aqui, a lógica predominante é de eficácia geral.</p>
+    </div>
+  </div>
+
+  <div class="slide" data-slide="13">
+    <div class="gradient-mesh">
+      <div class="blob" style="width:560px;height:560px;top:-120px;right:-120px;background:#1d6fa4;opacity:.16;"></div>
+      <div class="blob" style="width:340px;height:340px;bottom:-70px;left:-40px;background:#e8c96b;opacity:.12;"></div>
+      <div class="blob" style="width:220px;height:220px;top:44%;left:18%;background:#4ba3c3;opacity:.08;"></div>
+    </div>
+    <canvas class="particle-canvas" style="position:absolute;inset:0;z-index:1;"></canvas>
+    <div class="content text-center">
+      <div class="reveal" style="font-size:88px;margin-bottom:10px;animation:float 3s ease-in-out infinite;">✅</div>
+      <h2 class="section-title reveal" style="font-size:clamp(2.1rem,4.8vw,3.8rem);background:linear-gradient(135deg,#4ba3c3,#e8c96b,#1d6fa4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pontos finais para a apresentação</h2>
+      <div class="small-2col" style="margin-top:22px; text-align:left;">
+        <div class="card reveal"><h3>Ideia-chave 1</h3><p>ADO combate a omissão inconstitucional; ADPF protege preceitos fundamentais; o controle estadual aplica a supremacia constitucional no âmbito das Constituições Estaduais.</p></div>
+        <div class="card reveal"><h3>Ideia-chave 2</h3><p>Os efeitos <span class="emphasis">erga omnes</span>, o caráter <span class="accent">vinculante</span> e a distinção entre <span class="emphasis">ex tunc</span> e <span class="emphasis">ex nunc</span> ajudam a explicar a força prática dessas decisões.</p></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="changeSlide(-1)">&#8249;</button>
+  <div class="slide-dots" id="dots"></div>
+  <button class="nav-btn" onclick="changeSlide(1)">&#8250;</button>
+  <span class="slide-counter" id="counter">1 / 13</span>
+</div>
+
+<script>
+let current = 1;
+const total = document.querySelectorAll('.slide').length;
+const dotsContainer = document.getElementById('dots');
+const counter = document.getElementById('counter');
+for (let i = 1; i <= total; i++) { const dot = document.createElement('div'); dot.className = 'dot' + (i === 1 ? ' active' : ''); dot.onclick = () => goToSlide(i); dotsContainer.appendChild(dot); }
+function goToSlide(n) {
+  const prev = document.querySelector('.slide.active');
+  const next = document.querySelector(`.slide[data-slide="${n}"]`);
+  if (prev) prev.classList.remove('active');
+  if (next) { next.classList.add('active'); animateSlide(next); }
+  current = n; updateNav();
+}
+function changeSlide(dir) { let next = current + dir; if (next < 1) next = total; if (next > total) next = 1; goToSlide(next); }
+function updateNav() { document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i + 1 === current)); counter.textContent = current + ' / ' + total; }
+document.addEventListener('keydown', (e) => { if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); } if (e.key === 'ArrowLeft') { e.preventDefault(); changeSlide(-1); } });
+let touchStartX = 0;
+document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+document.addEventListener('touchend', (e) => { const diff = touchStartX - e.changedTouches[0].clientX; if (Math.abs(diff) > 50) changeSlide(diff > 0 ? 1 : -1); });
+function animateSlide(slide) {
+  slide.querySelectorAll('.reveal').forEach((el, i) => {
+    el.style.transition = 'none';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(18px)';
+    el.offsetHeight;
+    const delay = i * 0.07;
+    el.style.transition = `opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`;
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0px)';
+  });
+}
+document.addEventListener('mousemove', (e) => {
+  const spotlight = document.querySelector('.mouse-spotlight');
+  if (spotlight) spotlight.style.background = `radial-gradient(600px circle at ${e.clientX}px ${e.clientY}px, rgba(29,111,164,0.06), transparent 40%)`;
+});
+window.initParticles = function(canvas, options) {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+  const interactive = options.interactive !== false;
+  const count = options.count || (interactive ? 55 : 18);
+  let mx = -1000, my = -1000;
+  const particles = Array.from({ length: count }, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, size: Math.random() * 2.5 + 0.8, alpha: Math.random() * 0.35 + 0.1 }));
+  if (interactive) {
+    canvas.addEventListener('mousemove', (e) => { const rect = canvas.getBoundingClientRect(); mx = e.clientX - rect.left; my = e.clientY - rect.top; });
+    canvas.addEventListener('mouseleave', () => { mx = -1000; my = -1000; });
+  }
+  (function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      if (interactive) { const dx = p.x - mx, dy = p.y - my, dist = Math.sqrt(dx*dx + dy*dy) || 1; if (dist < 120) { const force = (120 - dist) / 120 * 2; p.vx += (dx / dist) * force * 0.1; p.vy += (dy / dist) * force * 0.1; } }
+      p.vx *= 0.98; p.vy *= 0.98; p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0; if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fillStyle = `rgba(75,163,195,${p.alpha})`; ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  })();
+};
+document.querySelectorAll('.particle-canvas').forEach(c => window.initParticles(c, { interactive: true, count: 55 }));
+document.querySelectorAll('.particle-canvas-ambient').forEach(c => window.initParticles(c, { interactive: false, count: 18 }));
+try { animateSlide(document.querySelector('.slide.active')); } catch(e) {}
+</script>
+</body>
+</html>
